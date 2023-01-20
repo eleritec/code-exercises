@@ -13,9 +13,16 @@ public class StockPickerB implements StockPicker {
 		for (int i = 1; i < prices.length; i++) {
 			current = prices[i];
 			boolean lastPrice = i==prices.length-1;
+			
+			// determine whether we've exceeded a local min/max
+			boolean inflection = current > anchor; // default to having no-position
+			if(position > 0 && !lastPrice) {
+				// reverse if we currently hold a position
+				inflection = current < anchor;
+			}
 
 			// if we've reached an inflection point, then make a trade
-			if (isInflection(current, position, anchor, lastPrice)) {
+			if (inflection) {
 				// if we have no position, then we'll do a buy
 				if (position == 0) {
 					position = anchor;
@@ -36,16 +43,5 @@ public class StockPickerB implements StockPicker {
 		}
 		return profit;
 	}
-	
-	private boolean isInflection(int currentPrice, int position, int anchor, boolean lastPrice) {
-		// if we don't currently have a position, then trigger a buy if we detect the 
-		// prices is starting to increase (we exceeded the local minimum).
-		if(position==0) {
-			return currentPrice > anchor;
-		}
 
-		// normally trigger a sell if we detect the price is starting to decrease.
-		// also trigger a sell if we're on the last available price and it's a local maximum.
-		return lastPrice? currentPrice > anchor: currentPrice < anchor;
-	}
 }
